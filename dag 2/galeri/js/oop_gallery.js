@@ -27,6 +27,10 @@ class OOPGallery {
 		this.autoRunVar = null;
 		this.wrap = true;
 		this.auto = true;
+		this.NewRandomImage = 0;
+		this.imageChangeSpeed = 50;
+		this.controlElementspeed;
+		this.controlElementspeedinput;
 
 	}
 	selectContainer(containerSelector) {
@@ -40,6 +44,8 @@ class OOPGallery {
 		this.controlElementWrap = this.containerElement.querySelector(".oopgallery-control-wrap");
 		this.controlElementAuto = this.containerElement.querySelector(".oopgallery-control-auto");
 		this.controlElementRandom = this.containerElement.querySelector(".oopgallery-control-random");
+		this.controlElementspeed = this.containerElement.querySelector(".oopgallery-control-speed");
+		this.controlElementspeedinput = this.containerElement.querySelector(".oopgallery-image-speed");
 		this.addEvents();
 		this.updateImage();
 	}
@@ -68,23 +74,23 @@ class OOPGallery {
 		}
 	}
 	gotoImageNext() {
-			if (!this.wrap) {
-				if (this.currentImgNumber < this.allImages.length - 1) {
-					this.currentImgNumber++;
-					this.updateImage();
-				}
-			}
-			else if (this.wrap && this.currentImgNumber < this.allImages.length - 1) {
+		if (!this.wrap) {
+			if (this.currentImgNumber < this.allImages.length - 1) {
 				this.currentImgNumber++;
 				this.updateImage();
 			}
-			else {
-				this.currentImgNumber = 0;
-				this.updateImage();
-			}
+		}
+		else if (this.wrap && this.currentImgNumber < this.allImages.length - 1) {
+			this.currentImgNumber++;
+			this.updateImage();
+		}
+		else {
+			this.currentImgNumber = 0;
+			this.updateImage();
+		}
 	}
 	gotoImageNextAuto() {
-		
+
 		if (this.currentImgNumber < this.allImages.length - 1) {
 			this.currentImgNumber++;
 			this.updateImage();
@@ -176,11 +182,26 @@ class OOPGallery {
 		this.spanElement = document.createElement("span");
 		this.spanElement.className = "oopgallery-image-number";
 
+		this.controlElementspeed = document.createElement("input");
+		this.controlElementspeed.type = "range";
+		this.controlElementspeed.min = 1;
+		this.controlElementspeed.max = 1000;
+		this.controlElementspeed.value = 50;
+
+
+		this.controlElementspeedinput = document.createElement("input");
+		this.controlElementspeedinput.type = "number";
+		this.controlElementspeedinput.value = 50;
+
+
+
 		controlDiv.appendChild(this.controlElementFirst);
 		controlDiv.appendChild(this.controlElementPrevious);
 		controlDiv.appendChild(this.spanElement);
 		controlDiv.appendChild(this.controlElementNext);
 		controlDiv.appendChild(this.controlElementLast);
+		controlDiv.appendChild(this.controlElementspeed);
+		controlDiv.appendChild(this.controlElementspeedinput);
 		this.containerElement.appendChild(controlDiv);
 		document.body.appendChild(this.containerElement);
 		this.addEvents();
@@ -208,24 +229,40 @@ class OOPGallery {
 		this.controlElementRandom.addEventListener("click", (event) => {
 			this.randomImage();
 		})
+		this.controlElementspeed.addEventListener("input", (event) => {
+			this.controlElementspeedinput.value = this.controlElementspeed.value;
+			this.imageChangeSpeed = this.controlElementspeed.value;
+			this.autorunChange();
+		})
+		this.controlElementspeedinput.addEventListener("input", (event) => {
+			this.controlElementspeed.value = this.controlElementspeedinput.value;
+			this.imageChangeSpeed = this.controlElementspeedinput.value;
+			this.autorunChange();
+		})
 		this.autoRun();
 	}
 	autoRun() {
 		if (this.auto) {
-
-
 			this.autoRunVar = setInterval(() => {
 				this.gotoImageNextAuto()
-			}, 3000)
+			}, 100000 / this.imageChangeSpeed)
 		}
 		else {
 			clearInterval(this.autoRunVar)
 		}
-
+	}
+	autorunChange() {
+		clearInterval(this.autoRunVar)
+		this.autoRun();
 	}
 	randomImage() {
-		this.currentImgNumber = Math.floor((Math.random() * this.allImages.length));
+		do {
+			this.NewRandomImage = Math.floor((Math.random() * this.allImages.length));
+		} while (this.NewRandomImage == this.currentImgNumber)
+		this.currentImgNumber = this.NewRandomImage;
 		this.updateImage();
 	}
+	imageChangeSpeed() {
 
+	}
 }
