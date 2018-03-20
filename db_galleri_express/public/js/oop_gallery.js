@@ -8,9 +8,9 @@
 // Spørg, hvis du er i tvivl omkring reglerne.
 
 class OOPGallery {
-
 	// Deklarér properties og definér funktioner/metoder her.
-	constructor() {
+	constructor(url) {
+
 		this.allImages = []
 		this.wrap = true;
 		this.containerElement = null;
@@ -32,6 +32,8 @@ class OOPGallery {
 		this.imageChangeSpeed = 50;
 		this.controlElementspeed;
 		this.controlElementspeedinput;
+		this.url = url;
+		this.getData();
 
 	}
 	selectContainer(containerSelector) {
@@ -49,6 +51,19 @@ class OOPGallery {
 		this.controlElementspeedinput = this.containerElement.querySelector(".oopgallery-image-speed");
 		this.addEvents();
 		this.updateImage();
+	}
+	getData() {
+		fetch(this.url)
+			.then((response) => {
+				return response.json();
+			})
+			.then((data) => {
+				data.forEach((element) => {
+					this.addImage(new image(element))
+				});
+				this.createGaleri();
+			})
+
 	}
 	gotoImageFirst() {
 		this.currentImgNumber = 0;
@@ -109,11 +124,11 @@ class OOPGallery {
 		dato = ${this.allImages[this.currentImgNumber].dato}<br>
 		fotograf = ${this.allImages[this.currentImgNumber].fotograf}`
 
-		this.imageElement.src = "http://localhost:3000/serveimage/" + this.allImages[this.currentImgNumber].filnavn;
+		this.imageElement.src = "img/" + this.allImages[this.currentImgNumber].filnavn;
 		this.spanElement.textContent = `${this.currentImgNumber + 1}/${this.allImages.length}`;
 	}
 	addImage(string) {
-		this.allImages.push(string);
+		this.allImages.push(new image(string));
 	}
 	addImages(array) {
 		this.allImages = this.allImages.concat(array);

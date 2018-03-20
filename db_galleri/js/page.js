@@ -3,7 +3,7 @@
 // Her er det tilladt at referere til specifikke gallerier, som f.eks. galleri01, galleri02, osv.
 
 document.addEventListener("DOMContentLoaded", function (event) {
-    fetch("http://localhost:1337/allinfo")
+    fetch("http://localhost:3000/allinfo")
         .then((response) => {
             return response.json();
         })
