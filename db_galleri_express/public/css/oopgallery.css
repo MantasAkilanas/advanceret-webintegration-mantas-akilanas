@@ -66,3 +66,7 @@
 .oopgallery-control-wrap:active {
 	color: #000;
 }
+.infoContainer{
+	display:flex;
+	justify-content: space-between;
+}

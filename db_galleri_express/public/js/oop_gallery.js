@@ -10,8 +10,8 @@
 class OOPGallery {
 	// Deklarér properties og definér funktioner/metoder her.
 	constructor(url) {
-
-		this.allImages = []
+		this.currentImages = [];
+		this.allImages = [];
 		this.wrap = true;
 		this.containerElement = null;
 		this.currentImgNumber = 0
@@ -32,9 +32,13 @@ class OOPGallery {
 		this.imageChangeSpeed = 50;
 		this.controlElementspeed;
 		this.controlElementspeedinput;
+		this.title = null;
+		this.author = null;
+		this.date = null;
 		this.url = url;
+		this.selectBox = null;
+		this.categoryList = [];
 		this.getData();
-
 	}
 	selectContainer(containerSelector) {
 		this.containerElement = document.querySelector(containerSelector);
@@ -58,19 +62,24 @@ class OOPGallery {
 				return response.json();
 			})
 			.then((data) => {
+				let category = "";
 				data.forEach((element) => {
 					this.addImage(new image(element))
+					if (element.kategori != category) {
+						category = element.kategori;
+						this.categoryList.push(category);
+					}
 				});
+				this.currentImages = this.allImages;
 				this.createGaleri();
 			})
-
 	}
 	gotoImageFirst() {
 		this.currentImgNumber = 0;
 		this.updateImage();
 	}
 	gotoImageLast() {
-		this.currentImgNumber = this.allImages.length - 1;
+		this.currentImgNumber = this.currentImages.length - 1;
 		this.updateImage();
 	}
 	gotoImagePrevious() {
@@ -85,18 +94,18 @@ class OOPGallery {
 			this.updateImage();
 		}
 		else {
-			this.currentImgNumber = this.allImages.length - 1;
+			this.currentImgNumber = this.currentImages.length - 1;
 			this.updateImage();
 		}
 	}
 	gotoImageNext() {
 		if (!this.wrap) {
-			if (this.currentImgNumber < this.allImages.length - 1) {
+			if (this.currentImgNumber < this.currentImages.length - 1) {
 				this.currentImgNumber++;
 				this.updateImage();
 			}
 		}
-		else if (this.wrap && this.currentImgNumber < this.allImages.length - 1) {
+		else if (this.wrap && this.currentImgNumber < this.currentImages.length - 1) {
 			this.currentImgNumber++;
 			this.updateImage();
 		}
@@ -106,8 +115,7 @@ class OOPGallery {
 		}
 	}
 	gotoImageNextAuto() {
-
-		if (this.currentImgNumber < this.allImages.length - 1) {
+		if (this.currentImgNumber < this.currentImages.length - 1) {
 			this.currentImgNumber++;
 			this.updateImage();
 		}
@@ -117,15 +125,11 @@ class OOPGallery {
 		}
 	}
 	updateImage() {
-		this.infocontainer.innerHTML = `id = ${this.allImages[this.currentImgNumber].id}<br>
-		titel = ${this.allImages[this.currentImgNumber].titel}<br>
-		kategori = ${this.allImages[this.currentImgNumber].kategori}<br>
-		filnavn = ${this.allImages[this.currentImgNumber].filnavn}<br>
-		dato = ${this.allImages[this.currentImgNumber].dato}<br>
-		fotograf = ${this.allImages[this.currentImgNumber].fotograf}`
-
-		this.imageElement.src = "img/" + this.allImages[this.currentImgNumber].filnavn;
-		this.spanElement.textContent = `${this.currentImgNumber + 1}/${this.allImages.length}`;
+		this.title.textContent = this.currentImages[this.currentImgNumber].titel
+		this.author.textContent = this.currentImages[this.currentImgNumber].fotograf;
+		this.date.textContent = this.currentImages[this.currentImgNumber].dato;
+		this.imageElement.src = "img/" + this.currentImages[this.currentImgNumber].filnavn;
+		this.spanElement.textContent = `${this.currentImgNumber + 1}/${this.currentImages.length}`;
 	}
 	addImage(string) {
 		this.allImages.push(new image(string));
@@ -133,7 +137,6 @@ class OOPGallery {
 	addImages(array) {
 		this.allImages = this.allImages.concat(array);
 	}
-
 	toggleWrapMode() {
 		this.wrap = !this.wrap;
 		this.controlElementWrap.textContent = this.wrap ? "wrap" : "nowrap";
@@ -157,11 +160,34 @@ class OOPGallery {
 	createGaleri() {
 		this.containerElement = document.createElement("div");
 		this.containerElement.className = "oopgallery-container";
+		this.selectBox = document.createElement("select");
+		let option = document.createElement("option");
+		option.textContent = "all";
+		option.value = "all";
+		this.selectBox.appendChild(option);
+		this.categoryList.forEach((element) => {
+			option = document.createElement("option");
+			option.textContent = element;
+			option.value = element;
+			this.selectBox.appendChild(option);
+		})
+		this.containerElement.appendChild(this.selectBox);
+		this.title = document.createElement("h2");
+		this.containerElement.appendChild(this.title);
 
 		this.imageElement = document.createElement("img");
 		this.imageElement.className = "oopgallery-image";
 
 		this.containerElement.appendChild(this.imageElement);
+
+		this.infoContainer = document.createElement("div");
+		this.infoContainer.className = "infoContainer";
+		this.author = document.createElement("p");
+		this.date = document.createElement("p");
+		this.infoContainer.appendChild(this.author);
+		this.infoContainer.appendChild(this.date);
+		this.containerElement.appendChild(this.infoContainer);
+
 
 		let controlDiv = document.createElement("div");
 		controlDiv.className = "oopgallery-controls";
@@ -215,11 +241,6 @@ class OOPGallery {
 		this.controlElementspeedinput.type = "number";
 		this.controlElementspeedinput.value = 50;
 
-		this.infocontainer = document.createElement("div");
-		this.infocontainer.className = "infocontainer";
-
-
-
 		controlDiv.appendChild(this.controlElementFirst);
 		controlDiv.appendChild(this.controlElementPrevious);
 		controlDiv.appendChild(this.spanElement);
@@ -228,7 +249,6 @@ class OOPGallery {
 		controlDiv.appendChild(this.controlElementspeed);
 		controlDiv.appendChild(this.controlElementspeedinput);
 		this.containerElement.appendChild(controlDiv);
-		this.containerElement.appendChild(this.infocontainer);
 		document.body.appendChild(this.containerElement);
 		this.addEvents();
 		this.updateImage();
@@ -265,16 +285,28 @@ class OOPGallery {
 			this.imageChangeSpeed = this.controlElementspeedinput.value;
 			this.autorunChange();
 		})
+		this.selectBox.addEventListener("change", (event) => {
+			this.changeCategory();
+		})
 		this.autoRun();
 	}
 	autoRun() {
 		if (this.auto) {
 			this.autoRunVar = setInterval(() => {
 				this.gotoImageNextAuto()
-			}, 100000 / this.imageChangeSpeed)
+			}, 100000 / this.imageChangeSpeed);
 		}
 		else {
-			clearInterval(this.autoRunVar)
+			clearInterval(this.autoRunVar);
+
+		}
+	}
+	restartAutoRun() {
+		if (this.auto) {
+			clearInterval(this.autoRunVar);
+			this.autoRunVar = setInterval(() => {
+				this.gotoImageNextAuto()
+			}, 100000 / this.imageChangeSpeed);
 		}
 	}
 	autorunChange() {
@@ -283,12 +315,28 @@ class OOPGallery {
 	}
 	randomImage() {
 		do {
-			this.NewRandomImage = Math.floor((Math.random() * this.allImages.length));
+			this.NewRandomImage = Math.floor((Math.random() * this.currentImages.length));
 		} while (this.NewRandomImage == this.currentImgNumber)
 		this.currentImgNumber = this.NewRandomImage;
 		this.updateImage();
 	}
 	imageChangeSpeed() {
+	}
+	changeCategory() {
+		this.currentImages = [];
+		if (this.selectBox.value != "all") {
+			this.allImages.forEach((element) => {
+				if (this.selectBox.value === element.kategori) {
+					this.currentImages.push(element);
+				}
 
+			})
+			this.currentImgNumber = 0;
+		}
+		else {
+			this.currentImages = this.allImages;
+		}
+		this.restartAutoRun();
+		this.updateImage();
 	}
 }

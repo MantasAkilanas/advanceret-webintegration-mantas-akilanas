@@ -11,7 +11,8 @@ module.exports = (server) => {
         res.render("pages/index");
     })
     server.get("/allinfo", (req, res) => {
-        const query = `select billede.id, billede.titel, kategori.navn as kategori, billede.filnavn, billede.dato, fotograf.navn as fotograf
+        const query = `select billede.id, billede.titel, kategori.navn as kategori, billede.filnavn, date_format(billede.dato, '%d-%m-%Y') as dato
+        , fotograf.navn as fotograf
             from billede 
             inner join kategori
                 on fk_kategori = kategori.id
