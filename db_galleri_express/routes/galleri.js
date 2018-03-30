@@ -52,5 +52,22 @@ module.exports = (server) => {
             res.end(image)
         })
     })
+    server.get("/score/:id", (req, res) => {
+        const query = `SELECT AVG(score) as score from score where fk_billede = ?`
+        sql_connection.query(query, [req.params.id], (err, data) => {
+            if(err){
+                console.log(err);
+            }
+            res.send(data);
+        })
+    })
+    server.post("/postscore", (req, res) => {
+        const query = `INSERT INTO score(score.score, score.fk_billede) values (?,?)`
+        sql_connection.query(query, [req.body.score, req.body.billede], (err, data) => {
+            if (err){
+                console.log(err);
+            }
+        })
+    })
 
 }

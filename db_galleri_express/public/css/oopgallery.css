@@ -70,3 +70,15 @@
 	display:flex;
 	justify-content: space-between;
 }
+.nameAndRatingBox{
+	display:flex;
+	justify-content: space-between;
+	font-size: 30px;
+
+}
+.nameAndRatingBox span{
+	padding-top: 20px;
+}
+/* .glyphicon-star{
+	color:yellow;
+} */

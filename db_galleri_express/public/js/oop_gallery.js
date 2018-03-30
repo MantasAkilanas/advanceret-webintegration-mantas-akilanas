@@ -38,6 +38,10 @@ class OOPGallery {
 		this.url = url;
 		this.selectBox = null;
 		this.categoryList = [];
+		this.nameAndRatingBox = null;
+		this.ratingBox = null;
+		this.stars = [];
+		this.posted = false;
 		this.getData();
 	}
 	selectContainer(containerSelector) {
@@ -62,12 +66,10 @@ class OOPGallery {
 				return response.json();
 			})
 			.then((data) => {
-				let category = "";
 				data.forEach((element) => {
 					this.addImage(new image(element))
-					if (element.kategori != category) {
-						category = element.kategori;
-						this.categoryList.push(category);
+					if (this.categoryList.indexOf(element.kategori) == -1) {
+						this.categoryList.push(element.kategori);
 					}
 				});
 				this.currentImages = this.allImages;
@@ -130,6 +132,7 @@ class OOPGallery {
 		this.date.textContent = this.currentImages[this.currentImgNumber].dato;
 		this.imageElement.src = "img/" + this.currentImages[this.currentImgNumber].filnavn;
 		this.spanElement.textContent = `${this.currentImgNumber + 1}/${this.currentImages.length}`;
+		this.markScore();
 	}
 	addImage(string) {
 		this.allImages.push(new image(string));
@@ -173,7 +176,20 @@ class OOPGallery {
 		})
 		this.containerElement.appendChild(this.selectBox);
 		this.title = document.createElement("h2");
-		this.containerElement.appendChild(this.title);
+		this.nameAndRatingBox = document.createElement("div");
+		this.nameAndRatingBox.className = "nameAndRatingBox";
+		this.ratingBox = document.createElement("div");
+
+		for (let i = 0; i < 5; i++) {
+			let span = document.createElement("span");
+			span.dataset.number = i + 1;
+			span.className = "glyphicon glyphicon-star-empty";
+			this.stars.push(span);
+			this.ratingBox.appendChild(span);
+		}
+		this.nameAndRatingBox.appendChild(this.title);
+		this.nameAndRatingBox.appendChild(this.ratingBox);
+		this.containerElement.appendChild(this.nameAndRatingBox);
 
 		this.imageElement = document.createElement("img");
 		this.imageElement.className = "oopgallery-image";
@@ -288,6 +304,20 @@ class OOPGallery {
 		this.selectBox.addEventListener("change", (event) => {
 			this.changeCategory();
 		})
+		this.stars.forEach((element) => {
+			element.addEventListener("mouseenter", (event) => {
+				this.markStars(event.target);
+			})
+			element.addEventListener("mouseleave", (event) => {
+				this.markScore();
+			})
+			element.addEventListener("click", (event) => {
+				if (!this.posted) {
+					this.postScore(event.target.dataset.number);
+				}
+			})
+		})
+
 		this.autoRun();
 	}
 	autoRun() {
@@ -338,5 +368,48 @@ class OOPGallery {
 		}
 		this.restartAutoRun();
 		this.updateImage();
+	}
+	markStars(targetElement) {
+		let target = targetElement;
+		target.className = "glyphicon glyphicon-star";
+		while (target.previousSibling) {
+			target = target.previousSibling;
+			target.className = "glyphicon glyphicon-star";
+		}
+	}
+	postScore(score) {
+		let headers = new Headers();
+		headers.append('Content-Type', 'application/json');
+		let init = {
+			method: 'POST',
+			headers: headers,
+			body: `{"billede":"${this.currentImages[this.currentImgNumber].id}","score":"${score}"}`,
+			cache: 'no-cache',
+			mode: 'cors'
+		};
+		fetch("http://localhost:3000/postscore/", init)
+	}
+	markScore() {
+		if (parseInt(this.currentImages[this.currentImgNumber].score) == 5) {
+			this.markStars(document.querySelector("[data-number='5']"))
+		}
+		else if (parseInt(this.currentImages[this.currentImgNumber].score) >= 4) {
+			this.markStars(document.querySelector("[data-number='4']"))
+		}
+		else if (parseInt(this.currentImages[this.currentImgNumber].score) >= 3) {
+			this.markStars(document.querySelector("[data-number='3']"))
+		}
+		else if (parseInt(this.currentImages[this.currentImgNumber].score) >= 2) {
+			this.markStars(document.querySelector("[data-number='2']"))
+		}
+		else if (parseInt(this.currentImages[this.currentImgNumber].score) >= 1) {
+			this.markStars(document.querySelector("[data-number='1']"))
+		}
+		else{
+			this.stars.forEach((element) => {
+				element.className = "glyphicon glyphicon-star-empty";
+			})
+		}
+
 	}
 }
